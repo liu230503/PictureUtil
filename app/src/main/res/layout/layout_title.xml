@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+    android:layout_marginLeft="10dp"
+    android:layout_marginRight="10dp">
+
+    <ImageButton
+        android:id="@+id/ib_back"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:background="@mipmap/keyboard_arrow_left_black_36x36" />
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="100dp"
+        android:layout_marginRight="100dp"
+        android:gravity="center"
+        android:singleLine="true"
+        android:textColor="@color/black"
+        android:textSize="22sp" />
+
+    <ImageButton
+        android:id="@+id/ib_save"
+        android:layout_width="25.2dp"
+        android:layout_height="25.2dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="5dp"
+        android:background="@mipmap/get_app_black_36x36" />
+
+    <ImageButton
+        android:id="@+id/ib_choice"
+        android:layout_width="25.2dp"
+        android:layout_height="25.2dp"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="15dp"
+        android:layout_toLeftOf="@id/ib_save"
+        android:background="@mipmap/perm_media_black_36x36" />
+</RelativeLayout>
