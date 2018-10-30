@@ -8,7 +8,7 @@ import android.os.Message;
 import android.support.v4.app.FragmentManager;
 
 import org.liumy.picture.core.enums.EnumFragmentIndex;
-import org.lmy.open.utillibrary.LogHelper;
+import org.lmy.open.utillibrary.LogUtil;
 
 
 /**********************************************************************
@@ -94,7 +94,7 @@ public final class FragmentPageManager implements Handler.Callback {
      */
     private void checkInit() {
         if (!mIsInitialization) {
-            LogHelper.d("Must first be initialized to use");
+            LogUtil.d("Must first be initialized to use");
             new Throwable("FragmentPageManager 使用前必须先进行初始化！");
         }
     }

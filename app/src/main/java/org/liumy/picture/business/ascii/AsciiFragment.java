@@ -8,12 +8,23 @@ import android.view.View;
 import android.widget.ImageView;
 
 import org.liumy.picture.R;
+import org.liumy.picture.core.application.Application;
 import org.liumy.picture.core.base.BaseFragment;
 import org.liumy.picture.core.util.PictureUtil;
 import org.liumy.picture.core.widget.TitleView;
+import org.liumy.processor.picture.PictureToAscii;
 import org.lmy.open.utillibrary.ToastUtil;
+import org.lmy.open.utillibrary.imageload.LoadImageHelper;
 
 import java.lang.ref.SoftReference;
+
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
+import io.reactivex.functions.Predicate;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * @author: liumy
@@ -56,7 +67,7 @@ public class AsciiFragment extends BaseFragment implements TitleView.TitleListen
 
     @Override
     protected void setViewsValue() {
-
+        mTitleView.setTitle("字节图片转换");
     }
 
     @Override
@@ -66,14 +77,35 @@ public class AsciiFragment extends BaseFragment implements TitleView.TitleListen
 
     @Override
     public void onSavePicture() {
-        if (mSoftReference == null) {
-            return;
-        }
-        Bitmap bitmap = mSoftReference.get();
-        if (bitmap != null) {
-            String s = PictureUtil.savePhotoToSD(bitmap, mContext);
-            ToastUtil.showToastShort(mContext, s);
-        }
+        Observable.just(mSoftReference)
+                .subscribeOn(Schedulers.io())
+                .filter(new Predicate<SoftReference<Bitmap>>() {
+                    @Override
+                    public boolean test(SoftReference<Bitmap> bitmapSoftReference) throws Exception {
+                        return bitmapSoftReference != null;
+                    }
+                }).flatMap(new Function<SoftReference<Bitmap>, ObservableSource<Bitmap>>() {
+            @Override
+            public ObservableSource<Bitmap> apply(SoftReference<Bitmap> bitmapSoftReference) throws Exception {
+                return Observable.just(bitmapSoftReference.get());
+            }
+        }).filter(new Predicate<Bitmap>() {
+            @Override
+            public boolean test(Bitmap bitmap) throws Exception {
+                return bitmap != null;
+            }
+        }).flatMap(new Function<Bitmap, ObservableSource<String>>() {
+            @Override
+            public ObservableSource<String> apply(Bitmap bitmap) throws Exception {
+                return Observable.just(PictureUtil.savePhotoToSD(bitmap, mContext));
+            }
+        }).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<String>() {
+                    @Override
+                    public void accept(String s) throws Exception {
+                        ToastUtil.showToastShort(mContext, s);
+                    }
+                });
     }
 
     @Override
@@ -84,12 +116,24 @@ public class AsciiFragment extends BaseFragment implements TitleView.TitleListen
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        String path = PictureUtil.getPath(requestCode, resultCode, data);
-        if (TextUtils.isEmpty(path)) {
-            return;
-        }
-        Bitmap bitmap = PictureUtil.showAsciiPicture(path);
-        mSoftReference = new SoftReference<>(bitmap);
-        mPhotoView.setImageBitmap(mSoftReference.get());
+        Observable.just(PictureUtil.getPath(requestCode, resultCode, data))
+                .observeOn(Schedulers.io())
+                .filter(new Predicate<String>() {
+                    @Override
+                    public boolean test(String s) throws Exception {
+                        return !TextUtils.isEmpty(s);
+                    }
+                }).flatMap(new Function<String, ObservableSource<String>>() {
+            @Override
+            public ObservableSource<String> apply(String s) throws Exception {
+                return PictureToAscii.getAsciiPicture(Application.getInstance().getContext(), s);
+            }
+        }).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<String>() {
+                    @Override
+                    public void accept(String s) throws Exception {
+                        LoadImageHelper.getInstance().loadImage(mPhotoView, LoadImageHelper.getInstance().getSdCardUrl(s));
+                    }
+                });
     }
 }

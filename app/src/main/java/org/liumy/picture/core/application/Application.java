@@ -1,6 +1,6 @@
 package org.liumy.picture.core.application;
 
-import org.liumy.picture.core.util.CrashHandler;
+import org.liumy.picture.MainActivity;
 import org.lmy.open.utillibrary.UtilApplication;
 
 /**
@@ -10,9 +10,9 @@ import org.lmy.open.utillibrary.UtilApplication;
  */
 public class Application extends UtilApplication {
 
+
     @Override
-    public void onCreate() {
-        super.onCreate();
-        CrashHandler.getInstance().init();
+    public Class getAbnormalRestartActivity() {
+        return MainActivity.class;
     }
 }
